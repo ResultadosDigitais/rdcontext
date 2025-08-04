@@ -9,7 +9,7 @@ describe('extract', () => {
 
   beforeEach(async () => {
     mocks = [
-      await mockModule('@libcontext/ai/openai', () => ({
+      await mockModule('./openai', () => ({
         openai: {
           chat: {
             completions: {

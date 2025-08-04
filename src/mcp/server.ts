@@ -1,5 +1,5 @@
-import { name, topK, version } from '@libcontext/constants';
-import { get, list } from '@libcontext/handlers';
+import { name, topK, version } from '../constants';
+import { get, list } from '../handlers';
 import { FastMCP } from 'fastmcp';
 import { z } from 'zod';
 

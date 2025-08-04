@@ -13,7 +13,7 @@ describe('cli', () => {
     const add = mock(async () => ({ snippets: 10 }));
 
     beforeEach(async () => {
-      mocks = [await mockModule('@libcontext/handlers/add', () => ({ add }))];
+      mocks = [await mockModule('./handlers/add', () => ({ add }))];
     });
 
     it('should be a command', async () => {
@@ -72,7 +72,7 @@ describe('cli', () => {
     const get = mock(async () => []);
 
     beforeEach(async () => {
-      mocks = [await mockModule('@libcontext/handlers/get', () => ({ get }))];
+      mocks = [await mockModule('./handlers/get', () => ({ get }))];
     });
 
     it('should be a command', async () => {
@@ -119,7 +119,7 @@ describe('cli', () => {
     const list = mock(async () => [lib]);
 
     beforeEach(async () => {
-      mocks = [await mockModule('@libcontext/handlers/list', () => ({ list }))];
+      mocks = [await mockModule('./handlers/list', () => ({ list }))];
     });
 
     it('should be a command', async () => {
@@ -143,7 +143,7 @@ describe('cli', () => {
     const rm = mock(async () => 1);
 
     beforeEach(async () => {
-      mocks = [await mockModule('@libcontext/handlers/rm', () => ({ rm }))];
+      mocks = [await mockModule('./handlers/rm', () => ({ rm }))];
     });
 
     it('should be a command', async () => {

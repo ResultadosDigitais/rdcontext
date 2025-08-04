@@ -1,5 +1,5 @@
-import { list as handler } from '@libcontext/handlers/list';
-import type { Command } from '@libcontext/types';
+import { list as handler } from '../handlers/list';
+import type { Command } from '../types';
 
 export const list: Command = {
   command: 'list',

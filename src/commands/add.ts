@@ -1,5 +1,5 @@
-import { type AddOptions, add as handler } from '@libcontext/handlers/add';
-import type { Command } from '@libcontext/types';
+import { type AddOptions, addV2 as handler } from '../handlers/add-v2';
+import type { Command } from '../types';
 
 export const add: Command<AddOptions> = {
   command: 'add <name>',

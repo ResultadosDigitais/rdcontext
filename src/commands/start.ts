@@ -1,4 +1,4 @@
-import type { Command } from '@libcontext/types';
+import type { Command } from '../types';
 
 export interface StartOptions {
   transport: 'stdio' | 'httpStream';
@@ -23,7 +23,7 @@ export const start: Command<StartOptions> = {
         number: true,
       }),
   handler: async ({ transport, port }) => {
-    const { server } = await import('@libcontext/mcp/server');
+    const { server } = await import('../mcp/server');
     await server.start({ transportType: transport, httpStream: { port } });
   },
 };

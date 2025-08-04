@@ -1,8 +1,8 @@
 {
-  "version": "6",
+  "version": "7",
   "dialect": "sqlite",
-  "id": "19d113c4-4004-4a02-bbaf-881cbdfd8a92",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
   "tables": {
     "libraries": {
       "name": "libraries",
@@ -85,14 +85,13 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
+      "uniqueConstraints": {}
     },
     "snippets": {
       "name": "snippets",
       "columns": {
-        "record": {
-          "name": "record",
+        "id": {
+          "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -140,15 +139,46 @@
           "notNull": true,
           "autoincrement": false
         },
-        "embedding": {
-          "name": "embedding",
-          "type": "F32_BLOB(1536)",
+        "provider": {
+          "name": "provider",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
+        },
+        "embedding_dims": {
+          "name": "embedding_dims",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(current_timestamp)"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "snippets_library_idx": {
+          "name": "snippets_library_idx",
+          "columns": ["library"],
+          "isUnique": false
+        },
+        "snippets_provider_idx": {
+          "name": "snippets_provider_idx",
+          "columns": ["provider"],
+          "isUnique": false
+        },
+        "snippets_created_at_idx": {
+          "name": "snippets_created_at_idx",
+          "columns": ["created_at"],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "snippets_library_libraries_name_fk": {
           "name": "snippets_library_libraries_name_fk",
@@ -161,11 +191,32 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
+      "uniqueConstraints": {}
+    },
+    "snippets_vec_fallback": {
+      "name": "snippets_vec_fallback",
+      "columns": {
+        "snippet_id": {
+          "name": "snippet_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "embedding": {
+          "name": "embedding",
+          "type": "blob",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     }
   },
-  "views": {},
   "enums": {},
   "_meta": {
     "schemas": {},

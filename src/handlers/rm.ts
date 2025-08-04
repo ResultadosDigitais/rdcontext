@@ -1,4 +1,4 @@
-import { db, library } from '@libcontext/db';
+import { db, library } from '../db';
 import { eq } from 'drizzle-orm';
 
 export interface RemoveOptions {

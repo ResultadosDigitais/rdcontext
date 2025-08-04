@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test';
-import { db, library, snippet } from '@libcontext/db';
+import { db, library, snippet } from '../db';
 import { stubs } from '../../tests/stubs';
 import { type MockResult, mockModule } from '../../tests/utils';
 import { type GetOptions, get } from './get';
@@ -16,7 +16,7 @@ describe('get', () => {
   });
 
   beforeEach(async () => {
-    mocks = [await mockModule('@libcontext/ai', () => ({ embed }))];
+    mocks = [await mockModule('../ai', () => ({ embed }))];
   });
 
   afterEach(() => {
@@ -45,6 +45,8 @@ describe('get', () => {
           language: 'javascript',
           code: 'console.log("first");',
           path: 'doc.md',
+          provider: 'openai',
+          embedding_dims: 1536,
         },
         {
           library: lib.name,
@@ -53,6 +55,8 @@ describe('get', () => {
           language: 'typescript',
           code: 'const x: number = 42;',
           path: 'doc.md',
+          provider: 'openai',
+          embedding_dims: 1536,
         },
         {
           library: lib.name,
@@ -61,6 +65,8 @@ describe('get', () => {
           language: 'python',
           code: 'print("hello")',
           path: 'doc.md',
+          provider: 'openai',
+          embedding_dims: 1536,
         },
       ];
 
@@ -90,6 +96,8 @@ describe('get', () => {
         language: 'javascript',
         code: `console.log(${i + 1});`,
         path: 'doc.md',
+        provider: 'openai',
+        embedding_dims: 1536,
       }));
 
       await db.insert(snippet).values(snippets);
@@ -112,6 +120,8 @@ describe('get', () => {
         language: 'python',
         code: 'def test():\n    return "hello world"',
         path: 'doc.md',
+        provider: 'gemini',
+        embedding_dims: 3072,
       };
 
       await db.insert(snippet).values(snippets);
@@ -142,6 +152,8 @@ def test():
         language: 'javascript',
         code: 'console.log("test");',
         path: 'doc.md',
+        provider: 'openai',
+        embedding_dims: 1536,
       };
 
       await db.insert(snippet).values(snippets);
@@ -182,6 +194,8 @@ def test():
           language: 'js',
           code: 'first();',
           path: 'doc.md',
+          provider: 'gemini',
+          embedding_dims: 3072,
         },
         {
           library: lib.name,
@@ -190,6 +204,8 @@ def test():
           language: 'js',
           code: 'second();',
           path: 'doc.md',
+          provider: 'openai',
+          embedding_dims: 1536,
         },
       ];
 
