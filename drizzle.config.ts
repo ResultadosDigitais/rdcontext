@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 
 // Replicate the exact same logic as the application
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
-const name = Object.keys(packageJson.bin)[0]; // 'libcontext'
+const name = Object.keys(packageJson.bin)[0]; // 'rdcontext'
 
 const homedir = os.homedir();
 const localAppData = process.env.LOCALAPPDATA || path.join(homedir, 'AppData', 'Local');

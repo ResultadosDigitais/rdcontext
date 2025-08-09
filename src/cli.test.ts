@@ -17,7 +17,7 @@ describe('cli', () => {
     });
 
     it('should be a command', async () => {
-      const name = 'cozmo-ai/libcontext';
+      const name = 'cozmo-ai/rdcontext';
       await cli.parseAsync(['add', name]);
       expect(add).toHaveBeenCalledWith(expect.objectContaining({ name }));
     });
@@ -33,7 +33,7 @@ describe('cli', () => {
     it('should accept either a branch or a tag, but not both', async () => {
       await cli.parseAsync([
         'add',
-        'cozmo-ai/libcontext',
+        'cozmo-ai/rdcontext',
         '--branch',
         'main',
         '--tag',
@@ -48,7 +48,7 @@ describe('cli', () => {
     it('should accept arguments', async () => {
       await cli.parseAsync([
         'add',
-        'cozmo-ai/libcontext',
+        'cozmo-ai/rdcontext',
         '--folders',
         'docs/a',
         'docs/b',
@@ -59,7 +59,7 @@ describe('cli', () => {
       ]);
       expect(add).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: 'cozmo-ai/libcontext',
+          name: 'cozmo-ai/rdcontext',
           folders: ['docs/a', 'docs/b'],
           branch: 'master',
           token: 'ghp_qwer1234',
@@ -76,7 +76,7 @@ describe('cli', () => {
     });
 
     it('should be a command', async () => {
-      const name = 'cozmo-ai/libcontext';
+      const name = 'cozmo-ai/rdcontext';
       const topic = 'how to add a library?';
       await cli.parseAsync(['get', name, topic]);
       expect(get).toHaveBeenCalledWith(
@@ -95,14 +95,14 @@ describe('cli', () => {
     it('should accept arguments', async () => {
       await cli.parseAsync([
         'get',
-        'cozmo-ai/libcontext',
+        'cozmo-ai/rdcontext',
         'how to add a library?',
         '--k',
         '20',
       ]);
       expect(get).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: 'cozmo-ai/libcontext',
+          name: 'cozmo-ai/rdcontext',
           topic: 'how to add a library?',
           k: 20,
         }),
@@ -112,7 +112,7 @@ describe('cli', () => {
 
   describe('list', () => {
     const lib = {
-      name: 'cozmo-ai/libcontext',
+      name: 'cozmo-ai/rdcontext',
       description:
         'Create your LLM context with documentation examples of libraries',
     };
@@ -147,7 +147,7 @@ describe('cli', () => {
     });
 
     it('should be a command', async () => {
-      const name = 'cozmo-ai/libcontext';
+      const name = 'cozmo-ai/rdcontext';
       await cli.parseAsync(['rm', name]);
       expect(rm).toHaveBeenCalledWith(expect.objectContaining({ name }));
     });

@@ -7,10 +7,10 @@ import os from 'os';
 // Use the same path logic as the actual app
 const homedir = os.homedir();
 const localAppData = process.env.LOCALAPPDATA || join(homedir, 'AppData', 'Local');
-const dataPath = join(localAppData, 'libcontext', 'Data');
+const dataPath = join(localAppData, 'rdcontext', 'Data');
 
 mkdirSync(dataPath, { recursive: true });
-const url = `file:${dataPath}/libcontext.db`;
+const url = `file:${dataPath}/rdcontext.db`;
 
 const client = createClient({ url });
 

@@ -72,50 +72,54 @@ export const geminiExtract = async ({
 
   const client = getGeminiClient();
 
-  const prompt = `You are an expert technical writer. Your job is to create concise, helpful descriptions for code snippets extracted from a library's documentation repo. These pieces of information will be used later to build a \`llms.txt\` file for the library.
+  const prompt = `You are an expert technical writer and design systems specialist. Your job is to create concise, helpful descriptions for code snippets and style examples extracted from a design system documentation repository. These pieces of information will be used later to build a llms.txt file for the library.
 
-For each code snippet you find:
+For each snippet you find:
 <goal>
-- Identify the programming language
-- Extract a relevant code snippet to display the functionality
-- Create title that describes what the code does
-- Write a brief description (2-3 sentences) explaining the code's purpose
-- Keep in mind that the title and description you write MUST be helpful for AI IDEs, like Cursor and Windsurf.
+- Identify the programming language or type (CSS, SCSS, JSON, JS, TSX, etc.)
+- Extract a relevant snippet to demonstrate the functionality or concept
+- Create a title that clearly describes what the snippet does
+- Write a short description (1-2 sentences) explaining the snippet's purpose
+- Ensure your title and description are helpful for AI IDEs like Cursor and Windsurf
 </goal>
 
 The titles should:
 <title>
-- Be descriptive and specific (not generic like "Code Example")
-- Be action-oriented when possible (e.g. "Installing Package via CLI", "Rendering Button Component")
+- Be clear, specific, and action-oriented
+- Reflect real-world tasks (e.g. "Applying Brand Colors", "Using Icon Component", "Defining Border Radius Tokens")
 - Be under 80 characters
 </title>
 
 The descriptions should:
 <description>
-- Explain what the code does and its purpose
-- Mention key components/functions/concepts
-- Be helpful for someone searching for similar functionality
-- Be 1-2 sentences, under 200 characters
+- Explain the functionality, usage, or concept demonstrated
+- Mention relevant components, design tokens, or style rules
+- Be helpful for developers searching for specific UI patterns or utilities
+- Be concise (max 200 characters)
 </description>
 
 <guidelines>
-- Look for code blocks marked with triple backticks (\`\`\`) or indented code blocks
-- Group code snippets by their functionality: be careful to not generate snippets that are too narrow (eg. how to import a component)
-- Extract ONLY the core library functionality, stripping away documentation wrapper elements
-- Focus on the actual library components being demonstrated, not how they're presented in the docs
-- If the file does not contain any code snippets, return an empty list
-- It is not necessary to include the library name in the title or description, as it is already known
+- Accept code blocks marked with triple backticks (\\\), fenced blocks with language tags, or indented code
+- For design tokens or configuration files (JSON, SCSS, etc.), extract meaningful subsets that illustrate purpose (e.g. spacing scale, typography settings)
+- Group snippets by functionality, not trivial operations (e.g. avoid isolated imports)
+- Include visual usage examples if they show how to apply styles, icons, colors, or layout utilities
+- Prioritize core components, tokens, or utilities over documentation boilerplate
 </guidelines>
 
+<design-system-specific>
+- Pay special attention to files about foundations (colors, spacing, typography), icons (SVG or component usage), and style primitives
+- Treat design tokens, style maps, and configuration objects as valuable content
+- Consider CSS/SCSS/JSON/YAML/etc. as code when relevant to the system’s functionality
+- Examples in Markdown (e.g. component usage shown within backticks or fenced blocks) are acceptable if they demonstrate usage
+</design-system-specific>
+
 <ignore>
-You should omit parts of the code that are:
-- Documentation layout components
-- Storybook wrappers and controls
-- Page structure elements (e.g. containers, wrappers purely for documentation display)
-- Not relevant to the library's functionality
-- Not in a programming language (e.g. plain text or markdown)
-- Inline code snippets (single backticks), unless it highlights an important feature
-- Import statements for documentation/layout components
+Omit snippets that are:
+- Documentation layout or wrapper components
+- Storybook controls or presentation-only code
+- Page structure elements used only for visual arrangement
+- Pure markdown text not related to component usage
+- Redundant import statements not essential to the snippet
 </ignore>
 
 You are currently analyzing the following library:
@@ -129,15 +133,16 @@ Here are the contents of the file to analyze now (${path}):
 ${content}
 </file>
 
-Please respond with a valid JSON array of objects. Each object should have exactly these fields:
+Please respond with a valid JSON array of objects. Each object must have:
 - title: string (objective title describing the feature)
-- description: string (explanation of what the code does, 2-3 sentences max)
-- language: string (programming language, empty string if not applicable)
-- code: string (the extracted code snippet)
+- description: string (what the code does, max 2-3 sentences)
+- language: string (programming language or config type, or empty if not applicable)
+- code: string (the extracted snippet)
 
-If no code snippets are found, return an empty array [].
+If no suitable snippets are found, return an empty array [].
 
-JSON Response:`;
+JSON Response:
+`;
 
   const result = await client.models.generateContent({
     model: process.env.GEMINI_TEXT_MODEL || 'gemini-1.5-pro',

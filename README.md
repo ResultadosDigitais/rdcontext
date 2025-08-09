@@ -1,25 +1,25 @@
-# LibContext
+# RDContext
 
 **Local, Private, and AI-Ready Code Documentation Server**
 
-LibContext is a local-first, privacy-focused tool to build AI-friendly context for any library based on its documentation files — including private repositories. Extract, index, and serve documentation for AI coding assistants, IDEs, and LLM workflows. Get better results.
+RDContext is a local-first, privacy-focused tool to build AI-friendly context for any library based on its documentation files — including private repositories. Extract, index, and serve documentation for AI coding assistants, IDEs, and LLM workflows. Get better results.
 
 ---
 
 ## Overview
 
-LibContext MCP pulls up-to-date, version-specific, relevant documentation and code examples from a GitHub repository and makes it available to your IDE.
+RDContext MCP pulls up-to-date, version-specific, relevant documentation and code examples from a GitHub repository and makes it available to your IDE.
 
-Add `use libcontext` to your prompt in Cursor:
+Add `use rdcontext` to your prompt in Cursor:
 
 ```
-Add a collapsible sidebar shadcn to the base layout of the app. use shadcn-ui, use libcontext
+Add a collapsible sidebar shadcn to the base layout of the app. use shadcn-ui, use rdcontext
 ```
 
-LibContext fetches up-to-date code examples and documentation right into your LLM's context.
+RDContext fetches up-to-date code examples and documentation right into your LLM's context.
 
 1. Write your prompt
-2. Tell the LLM to use LibContext
+2. Tell the LLM to use RDContext
 3. Get working code answers
 
 No tab-switching, no hallucinated APIs that don't exist, no outdated code generations.
@@ -52,23 +52,23 @@ No tab-switching, no hallucinated APIs that don't exist, no outdated code genera
 
 ## Installation
 
-You can install LibContext globally via npm:
+You can install RDContext globally via npm:
 
 ```bash
-npm install -g libcontext
+npm install -g rdcontext
 ```
 
 Or use it directly with `npx` (no installation required):
 
 ```bash
-npx -y libcontext <command>
+npx -y rdcontext <command>
 ```
 
 ---
 
 ## Environment Setup
 
-**You must set the `OPENAI_API_KEY` environment variable for LibContext to work.**
+**You must set the `OPENAI_API_KEY` environment variable for RDContext to work.**
 
 ```bash
 export OPENAI_API_KEY=sk-...
@@ -82,14 +82,14 @@ You can get your API key from [OpenAI's dashboard](https://platform.openai.com/a
 
 ### CLI Overview
 
-All commands are available via the `libcontext` CLI (or `npx -y libcontext <command>`).
+All commands are available via the `rdcontext` CLI (or `npx -y rdcontext <command>`).
 
 #### Add a Library
 
 Index documentation from a GitHub repository (public or private):
 
 ```bash
-libcontext add <owner/repo> [--branch <branch>] [--tag <tag>] [--folders <folder1> <folder2> ...] [--token <github_token>]
+rdcontext add <owner/repo> [--branch <branch>] [--tag <tag>] [--folders <folder1> <folder2> ...] [--token <github_token>]
 ```
 
 - `--branch <branch>`: Git branch to index (default: repo default branch)
@@ -99,28 +99,28 @@ libcontext add <owner/repo> [--branch <branch>] [--tag <tag>] [--folders <folder
 
 **Examples:**
 
-Add up-to-date LibContext documentation:
+Add up-to-date RDContext documentation:
 
 ```bash
-libcontext add cozmo-dev/libcontext --branch main
+rdcontext add cozmo-dev/rdcontext --branch main
 ```
 
 Add documentation of a specific ShadCN UI version:
 
 ```bash
-libcontext add shadcn-ui/ui --tag shadcn-ui@0.9.4
+rdcontext add shadcn-ui/ui --tag shadcn-ui@0.9.4
 ```
 
 Add documentation of a private repo of your GitHub org:
 
 ```bash
-libcontext add myorg/myrepo --branch main --folders docs src/guides --token ghp_xxx
+rdcontext add myorg/myrepo --branch main --folders docs src/guides --token ghp_xxx
 ```
 
 #### List Indexed Libraries
 
 ```bash
-libcontext list
+rdcontext list
 ```
 
 #### Get Documentation
@@ -128,7 +128,7 @@ libcontext list
 Fetch up-to-date documentation for a library, optionally filtered by topic:
 
 ```bash
-libcontext get <owner/repo> [topic] [--k <number_of_snippets>]
+rdcontext get <owner/repo> [topic] [--k <number_of_snippets>]
 ```
 
 - `topic`: (optional) Focus on a specific topic (e.g., "hooks", "routing")
@@ -137,13 +137,13 @@ libcontext get <owner/repo> [topic] [--k <number_of_snippets>]
 **Example:**
 
 ```bash
-libcontext get shadcn-ui/ui "Select"
+rdcontext get shadcn-ui/ui "Select"
 ```
 
 #### Remove a Library
 
 ```bash
-libcontext rm <owner/repo>
+rdcontext rm <owner/repo>
 ```
 
 #### Start the MCP Server
@@ -151,7 +151,7 @@ libcontext rm <owner/repo>
 Expose the documentation server for AI tools (Cursor, Windsurf, etc.):
 
 ```bash
-libcontext start [--transport stdio|httpStream] [--port <port>]
+rdcontext start [--transport stdio|httpStream] [--port <port>]
 ```
 
 - `--transport`: Communication method (`stdio` for local, `httpStream` for HTTP API, default: `stdio`)
@@ -161,7 +161,7 @@ libcontext start [--transport stdio|httpStream] [--port <port>]
 
 ### MCP server
 
-LibContext exposes a Model Context Protocol (MCP) server, making it easy to integrate with popular AI coding tools and IDEs.
+RDContext exposes a Model Context Protocol (MCP) server, making it easy to integrate with popular AI coding tools and IDEs.
 
 Requirements:
 
@@ -197,9 +197,9 @@ Or if you have not installed globally:
 ```json
 {
   "mcpServers": {
-    "libcontext": {
+    "rdcontext": {
       "command": "npx",
-      "args": ["-y", "libcontext", "start"],
+      "args": ["-y", "rdcontext", "start"],
       "env": {
         "OPENAI_API_KEY": "sk-..."
       }
@@ -216,9 +216,9 @@ Or if you have not installed globally:
 ```json
 {
   "mcpServers": {
-    "libcontext": {
+    "rdcontext": {
       "command": "bunx",
-      "args": ["-y", "libcontext", "start"],
+      "args": ["-y", "rdcontext", "start"],
       "env": {
         "OPENAI_API_KEY": "sk-..."
       }
@@ -239,8 +239,8 @@ Add this to your Windsurf MCP config file. See [Windsurf MCP docs](https://docs.
 ```json
 {
   "mcpServers": {
-    "libcontext": {
-      "command": "libcontext",
+    "rdcontext": {
+      "command": "rdcontext",
       "args": ["start"],
       "env": {
         "OPENAI_API_KEY": "sk-..."
@@ -259,10 +259,10 @@ If you prefer to run the MCP server in a Docker container:
 
 1. **Build the Docker Image:**
 
-   Then, build the image in the project root using a tag (e.g., `libcontext`). **Make sure Docker Desktop (or the Docker daemon) is running.** Run the following command in the same directory where you saved the `Dockerfile`:
+   Then, build the image in the project root using a tag (e.g., `rdcontext`). **Make sure Docker Desktop (or the Docker daemon) is running.** Run the following command in the same directory where you saved the `Dockerfile`:
 
    ```bash
-   docker build -t libcontext .
+   docker build -t rdcontext .
    ```
 
 2. **Configure Your MCP Client:**
@@ -274,12 +274,12 @@ If you prefer to run the MCP server in a Docker container:
    ```json
    {
      "mcpServers": {
-       "LibContext": {
+       "RDContext": {
          "autoApprove": [],
          "disabled": false,
          "timeout": 60,
          "command": "docker",
-         "args": ["run", "-i", "--rm", "libcontext"],
+         "args": ["run", "-i", "--rm", "rdcontext"],
          "transportType": "stdio"
        }
      }
@@ -294,22 +294,22 @@ If you prefer to run the MCP server in a Docker container:
 
 ### Add a Rule
 
-> If you don’t want to add `use libcontext` to every prompt, you can define a simple rule in your `.windsurfrules` file in Windsurf or from `Cursor Settings > Rules` section in Cursor (or the equivalent in your MCP client) to auto-invoke LibContext on any code-related question:
+> If you don't want to add `use rdcontext` to every prompt, you can define a simple rule in your `.windsurfrules` file in Windsurf or from `Cursor Settings > Rules` section in Cursor (or the equivalent in your MCP client) to auto-invoke RDContext on any code-related question:
 >
 > ```toml
 > [[calls]]
 > match = "when the user requests code examples, setup or configuration steps, or library/API documentation"
-> tool  = "libcontext"
+> tool  = "rdcontext"
 > ```
 >
-> From then on you’ll get LibContext’s docs in any related conversation without typing anything extra. You can add your use cases to the match part.
+> From then on you'll get RDContext's docs in any related conversation without typing anything extra. You can add your use cases to the match part.
 
 ---
 
 ## Data Storage
 
 - **Database:**  
-  Uses your OS's standard data directory (e.g., `~/.local/share/libcontext/libcontext.db` on Linux).
+  Uses your OS's standard data directory (e.g., `~/.local/share/rdcontext/rdcontext.db` on Linux).
 - **No Cloud:**  
   All data remains on your machine unless you explicitly share it.
 

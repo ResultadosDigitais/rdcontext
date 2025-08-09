@@ -1,5 +1,5 @@
 -- Unified V2 Schema Migration
--- Creates the optimized libcontext schema with unified snippets table and sqlite-vec support
+-- Creates the optimized rdcontext schema with unified snippets table and sqlite-vec support
 
 -- Create libraries table (unchanged from v1)
 CREATE TABLE `libraries` (

@@ -7,7 +7,7 @@ export interface StartOptions {
 
 export const start: Command<StartOptions> = {
   command: 'start',
-  description: 'Start the LibContext server',
+  description: 'Start the RDContext server',
   builder: (yargs) =>
     yargs
       .option('transport', {
