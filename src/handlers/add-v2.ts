@@ -1,6 +1,7 @@
-import { embed, extract } from '../ai';
+import { embedNormalized, getCurrentProvider, getCurrentModel } from '../ai/embed';
+import { extract } from '../ai/extract';
 import * as libcontext from '../constants';
-import { db, library } from '../db';
+import { db, library } from '../db/schema-v2';
 import { snippetStoreV2 } from '../db/snippet-store-v2';
 import { Octokit } from '@octokit/rest';
 import { eq } from 'drizzle-orm';
@@ -35,7 +36,7 @@ export interface AddOptions {
   token?: string;
 }
 
-export const add = async ({
+export const addV2 = async ({
   name,
   tag,
   branch,
@@ -43,6 +44,10 @@ export const add = async ({
   folders = [],
 }: AddOptions) => {
   const { owner, repo } = fromName(name);
+  const provider = getCurrentProvider();
+  const model = getCurrentModel();
+
+  console.log(`🚀 Indexing with ${provider} provider (${model}) - optimized 2025 architecture`);
 
   const github = new Octokit({
     userAgent: `${libcontext.name}/${libcontext.version}`,
@@ -84,15 +89,15 @@ export const add = async ({
       sha,
     }));
 
-  console.log(`Found ${files.length} files`);
+  console.log(`📁 Found ${files.length} documentation files`);
 
-  // Batch file fetching for better performance
-  const BATCH_SIZE = 10; // Process files in batches to avoid overwhelming GitHub API
+  // Batch file fetching with optimized error handling
+  const BATCH_SIZE = 10;
   const allSnippets = [];
 
   for (let i = 0; i < files.length; i += BATCH_SIZE) {
     const batch = files.slice(i, i + BATCH_SIZE);
-    console.log(`Processing files ${i + 1}-${Math.min(i + BATCH_SIZE, files.length)} of ${files.length}...`);
+    console.log(`📖 Processing files ${i + 1}-${Math.min(i + BATCH_SIZE, files.length)} of ${files.length}...`);
 
     const batchResults = await Promise.all(
       batch.map(async ({ path }) => {
@@ -105,7 +110,7 @@ export const add = async ({
           });
 
           if (Array.isArray(data) || data.type !== 'file') {
-            console.warn(`Skipping ${path}: Expected file but got ${Array.isArray(data) ? 'array' : data.type}`);
+            console.warn(`⚠️  Skipping ${path}: Expected file but got ${Array.isArray(data) ? 'array' : data.type}`);
             return [];
           }
 
@@ -127,7 +132,7 @@ export const add = async ({
             library: name,
           }));
         } catch (error) {
-          console.warn(`Failed to process ${path}:`, error.message);
+          console.warn(`❌ Failed to process ${path}:`, error.message);
           return [];
         }
       }),
@@ -136,25 +141,26 @@ export const add = async ({
     allSnippets.push(...batchResults.flat());
   }
 
-  console.log(`Extracted ${allSnippets.length} snippets, generating embeddings...`);
+  console.log(`🧠 Extracted ${allSnippets.length} snippets, generating normalized embeddings...`);
 
-  // Batch embedding generation for better performance
-  const EMBEDDING_BATCH_SIZE = 5; // Process embeddings in smaller batches
+  // Generate embeddings with normalization (all will be 3072d)
+  const EMBEDDING_BATCH_SIZE = 5;
   const snippetsWithEmbeddings = [];
 
   for (let i = 0; i < allSnippets.length; i += EMBEDDING_BATCH_SIZE) {
     const batch = allSnippets.slice(i, i + EMBEDDING_BATCH_SIZE);
-    console.log(`Generating embeddings ${i + 1}-${Math.min(i + EMBEDDING_BATCH_SIZE, allSnippets.length)} of ${allSnippets.length}...`);
+    console.log(`🔄 Generating embeddings ${i + 1}-${Math.min(i + EMBEDDING_BATCH_SIZE, allSnippets.length)} of ${allSnippets.length}...`);
 
     const batchWithEmbeddings = await Promise.all(
       batch.map(async (snippet) => {
         try {
-          const embedding = await embed(
+          // Use normalized embedding (always 3072d regardless of provider)
+          const embedding = await embedNormalized(
             `## ${snippet.title}\n\n${snippet.description}`,
           );
           return { ...snippet, embedding };
         } catch (error) {
-          console.warn(`Failed to generate embedding for snippet "${snippet.title}":`, error.message);
+          console.warn(`⚠️  Failed to generate embedding for "${snippet.title}":`, error.message);
           return null;
         }
       }),
@@ -163,43 +169,60 @@ export const add = async ({
     snippetsWithEmbeddings.push(...batchWithEmbeddings.filter(Boolean));
   }
 
-  console.log(`Successfully processed ${snippetsWithEmbeddings.length} snippets with embeddings`);
+  console.log(`✅ Successfully processed ${snippetsWithEmbeddings.length} snippets with normalized embeddings`);
 
-  console.log('Building index...');
-  const provider = snippetStoreV2.getCurrentProvider();
+  console.log('🏗️  Building optimized index with sqlite-vec...');
   
-  await db.transaction(async (tx) => {
-    // Delete existing library and all associated snippets
-    await tx.delete(library).where(eq(library.name, name));
+  // Delete existing data first (outside transaction to avoid conflicts)
+  try {
     await snippetStoreV2.deleteLibrarySnippets(name);
+  } catch (error) {
+    console.warn(`⚠️  Could not delete existing snippets for ${name}:`, error.message);
+    // Continue anyway - this might be the first time adding this library
+  }
+
+  // Use transaction for library metadata only
+  await db.transaction(async (tx) => {
+    // Delete existing library record
+    await tx.delete(library).where(eq(library.name, name));
     
-    // Insert new library record
-    await tx
-      .insert(library)
-      .values({
-        name,
-        owner,
-        repo,
-        folders,
-        ref,
-        sha,
-        description,
-        files: files.length,
-        snippets: snippetsWithEmbeddings.length,
-      })
-      .returning();
+    // Insert new library record with stats
+    await tx.insert(library).values({
+      name,
+      owner,
+      repo,
+      folders,
+      ref,
+      sha,
+      description,
+      files: files.length,
+      snippets: snippetsWithEmbeddings.length,
+    });
+  }, {
+    behavior: 'deferred'  // Use deferred transaction to reduce locking
   });
 
-  // Insert snippets using unified schema with cross-provider normalization
+  // Insert snippets using optimized sqlite-vec storage
   if (snippetsWithEmbeddings.length > 0) {
     await snippetStoreV2.insertSnippets(snippetsWithEmbeddings);
   }
   
-  console.log(`Done - stored ${snippetsWithEmbeddings.length} snippets using ${provider} provider`);
+  // Get final stats
+  const stats = await snippetStoreV2.getLibraryStats(name);
+  
+  console.log(`🎉 Indexing complete!`);
+  console.log(`   📊 Snippets: ${stats.totalSnippets}`);
+  console.log(`   🤖 Provider: ${provider} (${model})`);
+  console.log(`   📐 Dimensions: Original=${stats.avgEmbeddingDims}, Normalized=3072`);
+  console.log(`   💾 Total vectors: ${stats.vectorCount}`);
 
   return { 
     snippets: snippetsWithEmbeddings.length,
     provider,
-    dimensions: 3072, // All embeddings normalized to 3072 dimensions
+    model,
+    originalDimensions: provider === 'gemini' ? 3072 : 1536,
+    normalizedDimensions: 3072,
+    files: files.length,
+    stats,
   };
 };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { db, library } from '@libcontext/db';
+import { db, library } from '../db';
 import { stubs } from '../../tests/stubs';
 import { rm } from './rm';
 

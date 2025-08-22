@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
-import { name } from '@libcontext/constants';
-import { paths } from '@libcontext/utils/paths';
+import { name } from '../constants';
+import { paths } from '../utils/paths';
 
 if (process.env.NODE_ENV !== 'test') {
   try {

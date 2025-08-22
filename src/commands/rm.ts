@@ -1,5 +1,5 @@
-import { rm as handler, type RemoveOptions } from '@libcontext/handlers/rm';
-import type { Command } from '@libcontext/types';
+import { rm as handler, type RemoveOptions } from '../handlers/rm';
+import type { Command } from '../types';
 
 export const rm: Command<RemoveOptions> = {
   command: 'rm <name>',

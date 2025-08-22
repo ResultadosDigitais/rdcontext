@@ -1,4 +1,4 @@
-import type { Command } from '@libcontext/types';
+import type { Command } from '../types';
 
 export interface StartOptions {
   transport: 'stdio' | 'httpStream';
@@ -7,7 +7,7 @@ export interface StartOptions {
 
 export const start: Command<StartOptions> = {
   command: 'start',
-  description: 'Start the LibContext server',
+  description: 'Start the RDContext server',
   builder: (yargs) =>
     yargs
       .option('transport', {
@@ -23,7 +23,7 @@ export const start: Command<StartOptions> = {
         number: true,
       }),
   handler: async ({ transport, port }) => {
-    const { server } = await import('@libcontext/mcp/server');
+    const { server } = await import('../mcp/server');
     await server.start({ transportType: transport, httpStream: { port } });
   },
 };

@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, type Mock, spyOn } from 'bun:test';
-import { clear, migrate } from '@libcontext/db/migrations';
+import { clear, migrate } from '../src/db/migrations';
 
 let exit: Mock<(code?: number | string | undefined | null) => never>;
 let log: Mock<(...args: any[]) => void>;

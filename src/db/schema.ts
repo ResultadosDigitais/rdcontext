@@ -20,7 +20,8 @@ export const library = sqliteTable('libraries', {
 export type Library = typeof library.$inferSelect;
 export type CreateLibrary = typeof library.$inferInsert;
 
-export const snippet = sqliteTable('snippets', {
+// Base snippet schema shared by both providers
+const baseSnippetSchema = {
   record: int('record').primaryKey({ autoIncrement: true }),
   library: text('library')
     .references(() => library.name, { onDelete: 'cascade' })
@@ -30,7 +31,25 @@ export const snippet = sqliteTable('snippets', {
   description: text('description').notNull(),
   language: text('language'),
   code: text('code').notNull(),
+};
+
+// OpenAI snippets with 1536-dimensional embeddings
+export const snippetOpenAI = sqliteTable('snippets_openai', {
+  ...baseSnippetSchema,
   embedding: f32('embedding', { dimensions: 1536 }),
 });
-export type Snippet = typeof snippet.$inferSelect;
-export type CreateSnippet = typeof snippet.$inferInsert;
+
+// Gemini snippets with 3072-dimensional embeddings (optimal storage)
+export const snippetGemini = sqliteTable('snippets_gemini', {
+  ...baseSnippetSchema,
+  embedding: f32('embedding', { dimensions: 3072 }),
+});
+
+export type SnippetOpenAI = typeof snippetOpenAI.$inferSelect;
+export type SnippetGemini = typeof snippetGemini.$inferSelect;
+export type CreateSnippetOpenAI = typeof snippetOpenAI.$inferInsert;
+export type CreateSnippetGemini = typeof snippetGemini.$inferInsert;
+
+// Union type for any snippet
+export type Snippet = (SnippetOpenAI | SnippetGemini) & { provider: 'openai' | 'gemini' };
+export type CreateSnippet = (CreateSnippetOpenAI | CreateSnippetGemini) & { provider: 'openai' | 'gemini' };

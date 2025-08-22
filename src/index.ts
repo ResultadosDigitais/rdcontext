@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { cli } from '@libcontext/cli';
-import { migrate } from '@libcontext/db/migrations';
+import { cli } from './cli';
+import { migrate } from './db/migrations';
 
 await migrate();
 

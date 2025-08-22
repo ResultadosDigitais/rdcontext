@@ -1,5 +1,5 @@
-import { type GetOptions, get as handler } from '@libcontext/handlers/get';
-import type { Command } from '@libcontext/types';
+import { type GetOptions, getV2 as handler } from '../handlers/get-v2';
+import type { Command } from '../types';
 
 export const get: Command<GetOptions> = {
   command: 'get <name> [topic]',

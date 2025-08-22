@@ -1,5 +1,5 @@
-import { add, get, list, rm, start } from '@libcontext/commands';
-import { name, version } from '@libcontext/constants';
+import { add, get, list, rm, start } from './commands';
+import { name, version } from './constants';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
