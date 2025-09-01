@@ -31,6 +31,15 @@ export class VectorStore {
       return embedding;
     }
     
+    if (provider === 'gemini' && embedding.length === 768) {
+      // Pad 768d Gemini embeddings to 3072d with zeros
+      const normalized = new Array(3072).fill(0);
+      for (let i = 0; i < 768; i++) {
+        normalized[i] = embedding[i];
+      }
+      return normalized;
+    }
+    
     if (provider === 'openai' && embedding.length === 1536) {
       // Truncate OpenAI embeddings to first 3072 dimensions
       // This preserves most semantic information (Matryoshka embedding principle)
