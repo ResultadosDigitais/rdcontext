@@ -1,240 +1,219 @@
 # RDContext
 
-**Local, Private, and AI-Ready Code Documentation Server**
+**Servidor Local, Privado e Otimizado para IA de Documentação de Código**
 
-RDContext is a local-first, privacy-focused tool to build AI-friendly context for any library based on its documentation files — including private repositories. Extract, index, and serve documentation for AI coding assistants, IDEs, and LLM workflows. Get better results.
-
----
-
-## Overview
-
-RDContext MCP pulls up-to-date, version-specific, relevant documentation and code examples from a GitHub repository and makes it available to your IDE.
-
-Add `use rdcontext` to your prompt in Cursor:
-
-```
-Add a collapsible sidebar shadcn to the base layout of the app. use shadcn-ui, use rdcontext
-```
-
-RDContext fetches up-to-date code examples and documentation right into your LLM's context.
-
-1. Write your prompt
-2. Tell the LLM to use RDContext
-3. Get working code answers
-
-No tab-switching, no hallucinated APIs that don't exist, no outdated code generations.
-
-## How it works
-
-1. **Add a Library:**  
-   Use the CLI to fetch documentation files (Markdown/MDX) from the specified repo/branch/tag/folders.  
-   For private repos, supply a GitHub token.
-
-2. **AI Extraction:**  
-   Each documentation file is processed by a LLM to extract code snippets, titles, and descriptions optimized for LLM retrieval.
-
-3. **Local Indexing:**  
-   All extracted data is stored in a local libSQL database in your user data directory.
-
-4. **Query & Serve:**  
-   Use the CLI to query docs/snippets, or start the MCP server to integrate with AI tools.
-
-## Features
-
-- **CLI:** Add, list and remove documentation of your tech stack using our CLI.
-- **MCP Server:** Exposes a Model Context Protocol (MCP) server for integration with AI tools (Cursor, Windsurf, etc.).
-- **Local and Private:** All data is stored locally using [libSQL](https://github.com/tursodatabase/libsql). No cloud or third-party storage required.
-- **Customizable:** Choose which folders/files to index, and control which branches/tags to use.
-- **Internal Library Support:** Add documentation from private GitHub repositories using a personal access token.
-- **Cross-Platform:** Works on Linux, macOS, and Windows.
+RDContext é uma ferramenta local e focada em privacidade para construir contexto amigável à IA para qualquer biblioteca baseada em seus arquivos de documentação — incluindo repositórios privados. Extraia, indexe e sirva documentação para assistentes de IA, IDEs e fluxos de trabalho com LLM.
 
 ---
 
-## Installation
+## Início Rápido
 
-You can install RDContext globally via npm:
+### 🚀 Instalação Automatizada (Recomendada)
 
 ```bash
+# Clone o repositório
+git clone https://github.com/resultadosdigitais/rdcontext.git
+cd rdcontext
+
+# Dar permissão de execução ao script
+chmod +x install-rdcontext-cursor.sh
+
+# Execute o script de instalação
+./install-rdcontext-cursor.sh
+```
+
+Este script irá:
+- ✅ Verificar versão do Node.js (18.12+ obrigatório, 20+ LTS recomendado)
+- ✅ Instalar rdcontext globalmente
+- ✅ Configurar API keys (Gemini/OpenAI) de forma segura
+- ✅ Configurar token do GitHub para repos privados
+- ✅ Configurar MCP para o Cursor automaticamente
+- ✅ Adicionar bibliotecas de exemplo (FrontHub, Tangram)
+
+### 📋 Instalação Manual
+
+**Requisitos:**
+- Node.js 18.12+ (20+ LTS recomendado)
+- npm ou bun
+- Git
+
+```bash
+# Instalar globalmente
 npm install -g rdcontext
-```
 
-Or use it directly with `npx` (no installation required):
-
-```bash
-npx -y rdcontext <command>
+# Ou usar diretamente
+npx rdcontext --help
 ```
 
 ---
 
-## Environment Setup
+## Visão Geral
 
-**You must set the `OPENAI_API_KEY` environment variable for RDContext to work.**
+O RDContext MCP busca documentação e exemplos de código atualizados e específicos de versão de repositórios GitHub e os disponibiliza para sua IDE.
 
-```bash
-export OPENAI_API_KEY=sk-...
+Adicione `use rdcontext` ao seu prompt no Cursor:
+
+```
+Crie um componente Button usando o Tangram Design System, use rdcontext
 ```
 
-You can get your API key from [OpenAI's dashboard](https://platform.openai.com/api-keys).
+O RDContext busca exemplos de código e documentação atualizados diretamente no contexto do seu LLM.
+
+1. Escreva seu prompt
+2. Diga ao LLM para usar RDContext
+3. Obtenha respostas de código funcionais
+
+Sem mudança de abas, sem APIs alucinadas, sem gerações de código desatualizadas.
+
+## Como funciona
+
+1. **Adicionar uma Biblioteca:**  
+   Use a CLI para buscar arquivos de documentação (Markdown/MDX) de repo/branch/tag/pastas especificadas.
+
+2. **Extração por IA:**  
+   Cada arquivo de documentação é processado por LLM para extrair snippets de código, títulos e descrições otimizadas para recuperação.
+
+3. **Indexação Local:**  
+   Todos os dados extraídos são armazenados em um banco de dados SQLite local no diretório de dados do usuário.
+
+4. **Consulta e Servir:**  
+   Use a CLI para consultar docs/snippets, ou inicie o servidor MCP para integrar com ferramentas de IA.
+
+## Funcionalidades
+
+- **CLI:** Adicione, liste e remova documentação usando nossa CLI
+- **Servidor MCP:** Servidor Model Context Protocol para o Cursor
+- **Local e Privado:** Todos os dados armazenados localmente usando SQLite. Sem nuvem necessária
+- **Personalizável:** Escolha pastas/arquivos para indexar, controle branches/tags
+- **Repos Privados:** Adicione documentação de repositórios GitHub privados
+- **Multiplataforma:** Funciona no Linux, macOS e Windows
 
 ---
 
-## Usage
+## Configuração do Ambiente
 
-### CLI Overview
+### API Keys
 
-All commands are available via the `rdcontext` CLI (or `npx -y rdcontext <command>`).
+**Obrigatório:** Configure pelo menos uma API key de provedor de IA:
 
-#### Add a Library
+#### Instalação Interativa (Recomendado)
 
-Index documentation from a GitHub repository (public or private):
+O script de instalação sempre pergunta ao usuário pelas configurações necessárias:
 
-```bash
-rdcontext add <owner/repo> [--branch <branch>] [--tag <tag>] [--folders <folder1> <folder2> ...] [--token <github_token>]
-```
+- **API Keys** são solicitadas interativamente
+- **GitHub Token** é configurado conforme escolha do usuário
+- **Provedor de IA** é selecionado pelo usuário
+- **Configurações MCP** são criadas automaticamente
 
-- `--branch <branch>`: Git branch to index (default: repo default branch)
-- `--tag <tag>`: Git tag to index (mutually exclusive with `--branch`)
-- `--folders <folder1> <folder2> ...`: Only index documentation in these folders (default: all)
-- `--token <github_token>`: GitHub token for private repo access
-
-**Examples:**
-
-Add up-to-date RDContext documentation:
+#### Configuração Manual
 
 ```bash
-rdcontext add cozmo-dev/rdcontext --branch main
+# Para Gemini (recomendado)
+export GEMINI_API_KEY="sua-chave-aqui"
+export AI_PROVIDER="gemini"
+
+# Para OpenAI (alternativo)
+export OPENAI_API_KEY="sua-chave-aqui"
+export AI_PROVIDER="openai"
 ```
 
-Add documentation of a specific ShadCN UI version:
+**Configuração via arquivo .env:**
+```bash
+# ~/.env ou ~/.bashrc ou ~/.zshrc
+export GEMINI_API_KEY="sua-api-key-do-gemini"
+export OPENAI_API_KEY="sua-api-key-do-openai"  # opcional
+export AI_PROVIDER="gemini"  # ou "openai"
+```
+
+Obtenha suas chaves:
+- **Gemini:** https://makersuite.google.com/app/apikey
+- **OpenAI:** https://platform.openai.com/api-keys
+
+### Token do GitHub (Opcional)
+
+Para repositórios privados:
 
 ```bash
-rdcontext add shadcn-ui/ui --tag shadcn-ui@0.9.4
+export GITHUB_TOKEN=ghp_seu_token_github_aqui
 ```
 
-Add documentation of a private repo of your GitHub org:
+Obtenha seu token: https://github.com/settings/tokens
+
+---
+
+## Uso
+
+### Comandos da CLI
+
+#### Adicionar uma Biblioteca
 
 ```bash
-rdcontext add myorg/myrepo --branch main --folders docs src/guides --token ghp_xxx
+rdcontext add <owner/repo> [--branch <branch>] [--tag <tag>] [--folders <pasta1> <pasta2>] [--token <github_token>]
 ```
 
-#### List Indexed Libraries
+**Exemplos:**
+
+```bash
+# Adicionar o Tangram (design system)
+rdcontext add "resultadosdigitais/tangram" --folders "docs/examples/componests" "docs/docs" "docs/code" --token ghp_xxx
+
+# Adicionar o FrontHub (microfrontends)
+rdcontext add "resultadosdigitais/front-hub" --folders "packages/front-hub-docs/docs" --token ghp_xxx
+
+# Adicionar versão específica
+rdcontext add "shadcn-ui/ui" --tag v0.9.4
+
+# Repo privado com token
+rdcontext add "myorg/myrepo" --folders "docs" --token ghp_xxx
+```
+
+#### Listar Bibliotecas
 
 ```bash
 rdcontext list
 ```
 
-#### Get Documentation
-
-Fetch up-to-date documentation for a library, optionally filtered by topic:
+#### Consultar Documentação
 
 ```bash
-rdcontext get <owner/repo> [topic] [--k <number_of_snippets>]
+rdcontext get <owner/repo> [tópico] [--k <número_de_snippets>]
 ```
 
-- `topic`: (optional) Focus on a specific topic (e.g., "hooks", "routing")
-- `--k`: Number of top snippets to return (default: 10)
-
-**Example:**
-
+**Exemplos:**
 ```bash
-rdcontext get shadcn-ui/ui "Select"
+# Buscar exemplos de botões
+rdcontext get resultadosdigitais/tangram "botão"
+
+# Buscar exemplos de componentes
+rdcontext get resultadosdigitais/front-hub "componente"
+
+# Buscar padrões de design
+rdcontext get resultadosdigitais/tangram "padrões de design"
 ```
 
-#### Remove a Library
+#### Remover Biblioteca
 
 ```bash
 rdcontext rm <owner/repo>
 ```
 
-#### Start the MCP Server
 
-Expose the documentation server for AI tools (Cursor, Windsurf, etc.):
-
-```bash
-rdcontext start [--transport stdio|httpStream] [--port <port>]
-```
-
-- `--transport`: Communication method (`stdio` for local, `httpStream` for HTTP API, default: `stdio`)
-- `--port`: Port for HTTP transport (default: 3000)
 
 ---
 
-### MCP server
+## Integração com o Cursor
 
-RDContext exposes a Model Context Protocol (MCP) server, making it easy to integrate with popular AI coding tools and IDEs.
+### 🚀 Configuração Automática (Recomendada)
 
-Requirements:
+Use o script de instalação que configura automaticamente o MCP:
 
-- Node.js >= v18.0.0
-- Cursor, Windsurf, Claude Desktop or another MCP Client
-
-<details>
-<summary>Cursor</summary>
-
-Go to: `Settings` -> `Cursor Settings` -> `MCP` -> `Add new global MCP server`
-
-Pasting the following configuration into your Cursor `~/.cursor/mcp.json` file is the recommended approach. You may also install in a specific project by creating `.cursor/mcp.json` in your project folder. See [Cursor MCP docs](https://docs.cursor.com/context/model-context-protocol) for more info.
-
-```json
-{
-  "mcpServers": {
-    "libcontext": {
-      "command": "libcontext",
-      "args": ["start"],
-      "env": {
-        "OPENAI_API_KEY": "sk-..."
-      }
-    }
-  }
-}
+```bash
+./install-rdcontext-cursor.sh
 ```
 
-<details>
-<summary>Alternative: Without global installation</summary>
+### ⚙️ Configuração Manual
 
-Or if you have not installed globally:
-
-```json
-{
-  "mcpServers": {
-    "rdcontext": {
-      "command": "npx",
-      "args": ["-y", "rdcontext", "start"],
-      "env": {
-        "OPENAI_API_KEY": "sk-..."
-      }
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary>Alternative: Using with Bun runtime</summary>
-
-```json
-{
-  "mcpServers": {
-    "rdcontext": {
-      "command": "bunx",
-      "args": ["-y", "rdcontext", "start"],
-      "env": {
-        "OPENAI_API_KEY": "sk-..."
-      }
-    }
-  }
-}
-```
-
-</details>
-
-</details>
-
-<details>
-<summary>Windsurf</summary>
-
-Add this to your Windsurf MCP config file. See [Windsurf MCP docs](https://docs.windsurf.com/windsurf/mcp) for more info.
+Se preferir configurar manualmente, adicione ao `~/.cursor/mcp.json`:
 
 ```json
 {
@@ -243,119 +222,224 @@ Add this to your Windsurf MCP config file. See [Windsurf MCP docs](https://docs.
       "command": "rdcontext",
       "args": ["start"],
       "env": {
-        "OPENAI_API_KEY": "sk-..."
+        "AI_PROVIDER": "gemini",
+        "GEMINI_API_KEY": "sua-api-key-aqui",
+        "GEMINI_EMBEDDING_MODEL": "text-embedding-004"
       }
     }
   }
 }
 ```
 
-</details>
+### 🔧 Como usar no Cursor
 
-<details>
-<summary>Docker</summary>
-
-If you prefer to run the MCP server in a Docker container:
-
-1. **Build the Docker Image:**
-
-   Then, build the image in the project root using a tag (e.g., `rdcontext`). **Make sure Docker Desktop (or the Docker daemon) is running.** Run the following command in the same directory where you saved the `Dockerfile`:
-
-   ```bash
-   docker build -t rdcontext .
-   ```
-
-2. **Configure Your MCP Client:**
-
-   Update your MCP client's configuration to use the Docker command.
-
-   _Example for a cline_mcp_settings.json:_
-
-   ```json
-   {
-     "mcpServers": {
-       "RDContext": {
-         "autoApprove": [],
-         "disabled": false,
-         "timeout": 60,
-         "command": "docker",
-         "args": ["run", "-i", "--rm", "rdcontext"],
-         "transportType": "stdio"
-       }
-     }
-   }
-   ```
-
-   _Note: This is an example configuration. Please refer to the specific examples for your MCP client (like Cursor, VS Code, etc.) earlier in this README to adapt the structure (e.g., `mcpServers` vs `servers`). Also, ensure the image name in `args` matches the tag used during the `docker build` command._
-
-</details>
-
-## Tips
-
-### Add a Rule
-
-> If you don't want to add `use rdcontext` to every prompt, you can define a simple rule in your `.windsurfrules` file in Windsurf or from `Cursor Settings > Rules` section in Cursor (or the equivalent in your MCP client) to auto-invoke RDContext on any code-related question:
->
-> ```toml
-> [[calls]]
-> match = "when the user requests code examples, setup or configuration steps, or library/API documentation"
-> tool  = "rdcontext"
-> ```
->
-> From then on you'll get RDContext's docs in any related conversation without typing anything extra. You can add your use cases to the match part.
+1. **Instale o rdcontext** usando o script de instalação
+2. **Reinicie o Cursor** para aplicar as configurações MCP
+3. **Digite no editor**: `"Mostre exemplos de botões do Tangram"`
+4. **Use o contexto**: O rdcontext fornecerá exemplos reais e atualizados
 
 ---
 
-## Data Storage
+## Requisitos de Versão do Node.js
 
-- **Database:**  
-  Uses your OS's standard data directory (e.g., `~/.local/share/rdcontext/rdcontext.db` on Linux).
-- **No Cloud:**  
-  All data remains on your machine unless you explicitly share it.
+**Mínimo:** Node.js 18.12+  
+**Recomendado:** Node.js 20+ LTS
 
----
+O RDContext usa recursos modernos do JavaScript:
+- ES Modules (`import`/`export`)
+- `await` de nível superior
+- API Fetch nativa
+- APIs crypto modernas
 
-## Security & Privacy
+### Solução de Problemas do Node.js
 
-- **Private by Default:**  
-  All indexes are stored locally.  
-  ⚠️ During the _AI Extraction_ step the selected documentation is sent to the OpenAI API (or whichever LLM you configure).  
-  If you need zero-egress processing, self-host the model or disable extraction.
-- **Private Repo Support:**  
-  Your GitHub token is only used locally to fetch documentation.
+**Verificar versão:**
+```bash
+node --version
+```
 
----
+**Atualizar Node.js:**
+```bash
+# Ubuntu/Debian
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
-## Contributing
+# macOS
+brew install node
 
-- **Run in development mode:**
-  ```bash
-  bun dev
-  ```
+# Ou use nvm
+nvm install --lts
+nvm use --lts
+```
 
----
-
-## Troubleshooting
-
-- **Permission Errors:**  
-  Ensure the data directory is writable (see error message for path).
-- **Private Repo Issues:**  
-  Double-check your GitHub token and repo access.
-- **OpenAI Errors:**  
-  Ensure your `OPENAI_API_KEY` environment variable is set.
-
----
-
-## License
-
-MIT
+**Erros comuns:**
+- `SyntaxError: Unexpected token 'export'` → Atualize o Node.js
+- `ReferenceError: fetch is not defined` → Atualize para Node.js 18+
+- `Cannot use import statement` → Atualize o Node.js
 
 ---
 
-## Credits
+## Armazenamento de Dados
 
-Inspired by [upstash/context7](https://github.com/upstash/context7), but designed for local/private workflows.
+- **Banco de Dados:** Usa diretório padrão de dados do SO
+  - Linux: `~/.local/share/rdcontext/rdcontext.db`
+  - macOS: `~/Library/Application Support/rdcontext/rdcontext.db`
+  - Windows: `%LOCALAPPDATA%\rdcontext\Data\rdcontext.db`
+
+- **Sem Nuvem:** Todos os dados permanecem na sua máquina
+- **Privacidade:** Sem telemetria ou compartilhamento de dados externos
 
 ---
 
-**Build your own private, AI-ready documentation server—locally.**
+
+
+## 🎯 Casos de Uso e Comandos
+
+### 🛠️ Comandos Principais
+
+```bash
+# Listar bibliotecas
+rdcontext list
+
+# Adicionar nova biblioteca
+rdcontext add <owner/repo> --folders docs,src
+
+# Remover biblioteca
+rdcontext rm <owner/repo>
+
+# Buscar documentação
+rdcontext get <owner/repo> "tema"
+
+# Iniciar servidor MCP
+rdcontext start
+```
+
+### 🚀 Exemplos Práticos
+
+**Para Desenvolvedores:**
+```bash
+rdcontext get "resultadosdigitais/tangram" "padrões de design"
+rdcontext get "resultadosdigitais/tangram" "formulário validação" 
+rdcontext get "resultadosdigitais/tangram" "ícones"
+```
+
+**Para Criação de Telas:**
+```bash
+rdcontext get "resultadosdigitais/front-hub" "layout responsivo"
+rdcontext get "resultadosdigitais/front-hub" "microfrontend"
+rdcontext get "resultadosdigitais/front-hub" "integração"
+```
+
+### 🎯 Teste no Cursor
+
+Digite no editor:
+```
+👉 "Mostre exemplos de formulários do Tangram"
+```
+
+---
+
+## Solução de Problemas
+
+### Problemas Comuns
+
+**"rdcontext: command not found"**
+```bash
+# Recarregar shell
+source ~/.bashrc  # ou ~/.zshrc
+
+# Ou instalar globalmente
+npm install -g rdcontext
+```
+
+**Erro de API Key**
+```bash
+echo $GEMINI_API_KEY
+export GEMINI_API_KEY="sua-chave"
+```
+
+**Erro de permissão**
+```bash
+chmod +x $(which rdcontext)
+```
+
+**Servidor não responde**
+```bash
+ps aux | grep rdcontext
+pkill -f rdcontext
+rdcontext start
+```
+
+**"No sessionId" no navegador**
+- Isso é normal para servidores MCP
+- Use através da sua IDE, não diretamente no navegador
+
+**Limites de Rate da API**
+- Use token do GitHub para limites maiores
+- Gemini tem tier gratuito generoso
+- OpenAI requer conta paga para uso em produção
+
+**Erros de Build**
+```bash
+# Limpar cache e reinstalar
+npm cache clean --force
+npm install -g rdcontext
+```
+
+### Obtendo Ajuda
+
+1. Verifique este README
+2. Execute `rdcontext --help`
+3. Verifique Issues no GitHub
+4. Verifique versão do Node.js (18.12+ obrigatório)
+
+---
+
+## 📚 Scripts de Instalação
+
+### `install-rdcontext-cursor.sh`
+Script principal para instalação no Cursor:
+- ✅ Instalação limpa e interativa
+- ✅ Configuração automática do MCP
+- ✅ Preserva configurações MCP existentes
+- ✅ Adiciona bibliotecas da RD Station automaticamente
+
+```bash
+# Dar permissão de execução
+chmod +x install-rdcontext-cursor.sh
+
+# Executar instalação
+./install-rdcontext-cursor.sh
+```
+
+---
+
+## 🛠️ Desenvolvimento
+
+```bash
+# Clonar repositório
+git clone https://github.com/resultadosdigitais/rdcontext.git
+cd rdcontext
+
+# Instalar dependências
+npm install
+
+# Build
+npm run build
+
+# Instalar localmente
+npm install -g .
+
+# Executar testes
+npm test
+```
+
+---
+
+## Licença
+
+Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+---
+
+**✨ Feliz codificação com RDContext!**
