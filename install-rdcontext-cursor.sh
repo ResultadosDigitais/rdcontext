@@ -145,11 +145,17 @@ configure_api_keys() {
             read -s -p "Digite sua API Key do Gemini (não será exibida): " GEMINI_API_KEY
             echo
             if [ -n "$GEMINI_API_KEY" ]; then
-                echo "export GEMINI_API_KEY=\"$GEMINI_API_KEY\"" >> ~/.bashrc
-                echo "export AI_PROVIDER=\"gemini\"" >> ~/.bashrc
+                CONFIG_STRING="
+# rdcontext configuration
+export GEMINI_API_KEY=\"$GEMINI_API_KEY\"
+export AI_PROVIDER=\"gemini\""
+                echo "$CONFIG_STRING" >> ~/.bashrc
+                if [ -f ~/.zshrc ]; then
+                    echo "$CONFIG_STRING" >> ~/.zshrc
+                fi
                 export GEMINI_API_KEY="$GEMINI_API_KEY"
                 export AI_PROVIDER="gemini"
-                log_success "✅ API Key do Gemini configurada!"
+                log_success "✅ API Key do Gemini configurada em ~/.bashrc e/ou ~/.zshrc!"
             else
                 log_warning "⚠️  API Key vazia, Gemini não configurado"
             fi
@@ -160,11 +166,17 @@ configure_api_keys() {
             read -s -p "Digite sua API Key da OpenAI (não será exibida): " OPENAI_API_KEY
             echo
             if [ -n "$OPENAI_API_KEY" ]; then
-                echo "export OPENAI_API_KEY=\"$OPENAI_API_KEY\"" >> ~/.bashrc
-                echo "export AI_PROVIDER=\"openai\"" >> ~/.bashrc
+                CONFIG_STRING="
+# rdcontext configuration
+export OPENAI_API_KEY=\"$OPENAI_API_KEY\"
+export AI_PROVIDER=\"openai\""
+                echo "$CONFIG_STRING" >> ~/.bashrc
+                if [ -f ~/.zshrc ]; then
+                    echo "$CONFIG_STRING" >> ~/.zshrc
+                fi
                 export OPENAI_API_KEY="$OPENAI_API_KEY"
                 export AI_PROVIDER="openai"
-                log_success "✅ API Key da OpenAI configurada!"
+                log_success "✅ API Key da OpenAI configurada em ~/.bashrc e/ou ~/.zshrc!"
             else
                 log_warning "⚠️  API Key vazia, OpenAI não configurado"
             fi
@@ -190,9 +202,15 @@ configure_github_token() {
         read -s -p "Digite seu GitHub Token (não será exibido): " GITHUB_TOKEN
         echo
         if [ -n "$GITHUB_TOKEN" ]; then
-            echo "export GITHUB_TOKEN=\"$GITHUB_TOKEN\"" >> ~/.bashrc
+            CONFIG_STRING="
+# rdcontext GitHub configuration
+export GITHUB_TOKEN=\"$GITHUB_TOKEN\""
+            echo "$CONFIG_STRING" >> ~/.bashrc
+            if [ -f ~/.zshrc ]; then
+                echo "$CONFIG_STRING" >> ~/.zshrc
+            fi
             export GITHUB_TOKEN="$GITHUB_TOKEN"
-            log_success "✅ GitHub Token configurado!"
+            log_success "✅ GitHub Token configurado em ~/.bashrc e/ou ~/.zshrc!"
         else
             log_warning "⚠️  Token vazio, GitHub Token não configurado"
         fi
@@ -346,9 +364,9 @@ add_example_libraries() {
         log_success "FrontHub adicionado com sucesso!"
         
         log_info "Adicionando Tangram Design System..."
-        log_info "Comando: rdcontext add \"resultadosdigitais/tangram\" --folders \"docs/examples/componests\" \"docs/docs\" \"docs/code\" --token [GITHUB_TOKEN]"
+        log_info "Comando: rdcontext add \"resultadosdigitais/tangram\" --folders \"docs/examples/components\" \"docs/docs\" \"docs/code\" --token [GITHUB_TOKEN]"
         echo
-        rdcontext add "resultadosdigitais/tangram" --folders "docs/examples/componests" "docs/docs" "docs/code" --token "$GITHUB_TOKEN"
+        rdcontext add "resultadosdigitais/tangram" --folders "docs/examples/components" "docs/docs" "docs/code" --token "$GITHUB_TOKEN"
         log_success "Tangram adicionado com sucesso!"
     fi
 }
@@ -392,7 +410,7 @@ show_next_steps() {
     echo "5. Comandos específicos para RD Station:"
     echo "   rdcontext add \"resultadosdigitais/front-hub\" --folders \"packages/front-hub-docs/docs\" --token SEU_GITHUB_TOKEN"
     echo
-    echo "   rdcontext add \"resultadosdigitais/tangram\" --folders \"docs/examples/componests\" \"docs/docs\" \"docs/code\" --token SEU_GITHUB_TOKEN"
+    echo "   rdcontext add \"resultadosdigitais/tangram\" --folders \"docs/examples/components\" \"docs/docs\" \"docs/code\" --token SEU_GITHUB_TOKEN"
     echo
     echo
     echo "📚 Documentação completa:"

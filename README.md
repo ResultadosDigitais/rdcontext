@@ -155,7 +155,7 @@ rdcontext add <owner/repo> [--branch <branch>] [--tag <tag>] [--folders <pasta1>
 
 ```bash
 # Adicionar o Tangram (design system)
-rdcontext add "resultadosdigitais/tangram" --folders "docs/examples/componests" "docs/docs" "docs/code" --token ghp_xxx
+rdcontext add "resultadosdigitais/tangram" --folders "docs/examples/components" "docs/docs" "docs/code" --token ghp_xxx
 
 # Adicionar o FrontHub (microfrontends)
 rdcontext add "resultadosdigitais/front-hub" --folders "packages/front-hub-docs/docs" --token ghp_xxx
