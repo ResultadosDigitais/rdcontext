@@ -199,9 +199,7 @@ configure_github_token() {
         read -s -p "Digite seu GitHub Token (não será exibido): " GITHUB_TOKEN
         echo
         if [ -n "$GITHUB_TOKEN" ]; then
-            CONFIG_STRING="
-# rdcontext GitHub configuration
-export GITHUB_TOKEN=\"$GITHUB_TOKEN\""
+            CONFIG_STRING=$(printf '\n# rdcontext GitHub configuration\nexport GITHUB_TOKEN=%q' "$GITHUB_TOKEN")
             echo "$CONFIG_STRING" >> ~/.bashrc
             if [ -f ~/.zshrc ]; then
                 echo "$CONFIG_STRING" >> ~/.zshrc
