@@ -145,10 +145,7 @@ configure_api_keys() {
             read -s -p "Digite sua API Key do Gemini (não será exibida): " GEMINI_API_KEY
             echo
             if [ -n "$GEMINI_API_KEY" ]; then
-                CONFIG_STRING="
-# rdcontext configuration
-export GEMINI_API_KEY=\"$GEMINI_API_KEY\"
-export AI_PROVIDER=\"gemini\""
+                CONFIG_STRING=$(printf '\n# rdcontext configuration\nexport GEMINI_API_KEY=%q\nexport AI_PROVIDER="gemini"' "$GEMINI_API_KEY")
                 echo "$CONFIG_STRING" >> ~/.bashrc
                 if [ -f ~/.zshrc ]; then
                     echo "$CONFIG_STRING" >> ~/.zshrc
