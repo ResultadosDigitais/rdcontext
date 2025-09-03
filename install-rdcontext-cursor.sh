@@ -245,29 +245,73 @@ configure_cursor_mcp() {
     mkdir -p "$cursor_config_dir"
     cp "$mcp_config" "$mcp_config.backup.$(date +%Y%m%d_%H%M%S)" 2>/dev/null || true
 
-    # Gera JSON de forma segura usando jq para evitar corrupção por caracteres especiais
-    jq -n \
-        --arg gemini_key "$GEMINI_API_KEY" \
-        --arg openai_key "$OPENAI_API_KEY" \
-        --arg github_token "$GITHUB_TOKEN" \
-        --arg ai_provider "$AI_PROVIDER" \
-        '{
-            "mcpServers": {
-                "rdcontext": {
-                    "command": "rdcontext",
-                    "args": ["start"],
-                    "env": {
-                        "GEMINI_API_KEY": $gemini_key,
-                        "OPENAI_API_KEY": $openai_key,
-                        "GITHUB_TOKEN": $github_token,
-                        "AI_PROVIDER": $ai_provider,
-                        "GEMINI_EMBEDDING_MODEL": "text-embedding-004",
-                        "OPENAI_EMBEDDING_MODEL": "text-embedding-3-large"
+    # Verifica se o arquivo mcp.json já existe
+    if [ -f "$mcp_config" ]; then
+        log_info "Atualizando configuração MCP existente..."
+        
+        # Atualiza o arquivo existente, preservando outras configurações
+        # Cria objeto de ambiente apenas com chaves que têm valores
+        local env_obj="{}"
+        if [ -n "$GEMINI_API_KEY" ]; then
+            env_obj=$(echo "$env_obj" | jq --arg key "$GEMINI_API_KEY" '. + {"GEMINI_API_KEY": $key}')
+        fi
+        if [ -n "$OPENAI_API_KEY" ]; then
+            env_obj=$(echo "$env_obj" | jq --arg key "$OPENAI_API_KEY" '. + {"OPENAI_API_KEY": $key}')
+        fi
+        if [ -n "$GITHUB_TOKEN" ]; then
+            env_obj=$(echo "$env_obj" | jq --arg key "$GITHUB_TOKEN" '. + {"GITHUB_TOKEN": $key}')
+        fi
+        if [ -n "$AI_PROVIDER" ]; then
+            env_obj=$(echo "$env_obj" | jq --arg provider "$AI_PROVIDER" '. + {"AI_PROVIDER": $provider}')
+        fi
+        
+        # Sempre adiciona os modelos de embedding
+        env_obj=$(echo "$env_obj" | jq '. + {"GEMINI_EMBEDDING_MODEL": "text-embedding-004"}')
+        env_obj=$(echo "$env_obj" | jq '. + {"OPENAI_EMBEDDING_MODEL": "text-embedding-3-large"}')
+        
+        jq --argjson env "$env_obj" \
+           '.mcpServers.rdcontext = {
+                "command": "rdcontext",
+                "args": ["start"],
+                "env": $env
+            }' \
+            "$mcp_config" > "$mcp_config.tmp" && mv "$mcp_config.tmp" "$mcp_config"
+        log_success "Configuração MCP atualizada em $mcp_config"
+    else
+        # Cria um novo arquivo se não existir
+        log_info "Criando nova configuração MCP..."
+        
+        # Cria objeto de ambiente apenas com chaves que têm valores
+        local env_obj="{}"
+        if [ -n "$GEMINI_API_KEY" ]; then
+            env_obj=$(echo "$env_obj" | jq --arg key "$GEMINI_API_KEY" '. + {"GEMINI_API_KEY": $key}')
+        fi
+        if [ -n "$OPENAI_API_KEY" ]; then
+            env_obj=$(echo "$env_obj" | jq --arg key "$OPENAI_API_KEY" '. + {"OPENAI_API_KEY": $key}')
+        fi
+        if [ -n "$GITHUB_TOKEN" ]; then
+            env_obj=$(echo "$env_obj" | jq --arg key "$GITHUB_TOKEN" '. + {"GITHUB_TOKEN": $key}')
+        fi
+        if [ -n "$AI_PROVIDER" ]; then
+            env_obj=$(echo "$env_obj" | jq --arg provider "$AI_PROVIDER" '. + {"AI_PROVIDER": $provider}')
+        fi
+        
+        # Sempre adiciona os modelos de embedding
+        env_obj=$(echo "$env_obj" | jq '. + {"GEMINI_EMBEDDING_MODEL": "text-embedding-004"}')
+        env_obj=$(echo "$env_obj" | jq '. + {"OPENAI_EMBEDDING_MODEL": "text-embedding-3-large"}')
+        
+        jq -n --argjson env "$env_obj" \
+            '{
+                "mcpServers": {
+                    "rdcontext": {
+                        "command": "rdcontext",
+                        "args": ["start"],
+                        "env": $env
                     }
                 }
-            }
-        }' > "$mcp_config"
-    log_success "Configuração MCP criada em $mcp_config"
+            }' > "$mcp_config"
+        log_success "Configuração MCP criada em $mcp_config"
+    fi
 }
 
 # Testa a instalação
