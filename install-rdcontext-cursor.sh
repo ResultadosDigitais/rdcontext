@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Script de instalação do rdcontext focado no Cursor
 # Versão idempotente - evita duplicar variáveis no shell
 
-set -e
+set -euo pipefail
 
 # Cores para output
 RED='\033[0;31m'
@@ -11,6 +11,12 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Inicializa variáveis para evitar erros com set -u
+GEMINI_API_KEY=""
+OPENAI_API_KEY=""
+GITHUB_TOKEN=""
+AI_PROVIDER="gemini" # valor padrão
 
 # Funções de log
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
@@ -36,12 +42,12 @@ add_to_shell_config() {
     local var_name=$2
     local config_string=$3
 
-    # Só adiciona se ainda não existir no arquivo
-    if ! grep -q "$var_name" "$config_file" 2>/dev/null; then
+    # Só adiciona se ainda não existir no arquivo (verifica declaração export real)
+    if ! grep -qE "^[[:space:]]*export[[:space:]]+$var_name=" "$config_file" 2>/dev/null; then
         echo "$config_string" >> "$config_file"
         log_success "Adicionado $var_name em $config_file"
     else
-        log_info "$var_name já existe em $config_file, pulando..."
+        log_info "$var_name já foi configurado em $config_file, pulando..."
     fi
 }
 
@@ -53,7 +59,7 @@ check_dependencies() {
         log_error "❌ Node.js não encontrado!"
         exit 1
     fi
-    NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
+    NODE_VERSION=$(node --version | sed 's/^v//' | cut -d'.' -f1)
     if [ "$NODE_VERSION" -lt 18 ]; then
         log_error "❌ Node.js $(node --version) é muito antigo!"
         exit 1
@@ -72,7 +78,7 @@ check_dependencies() {
         log_error "❌ Git não encontrado!"
         exit 1
     else
-        log_success "Git $(git --version | cut -d' ' -f3) encontrado"
+        log_success "Git $(git --version | awk '{print $3}') encontrado"
     fi
 
     if ! command -v jq &>/dev/null; then
@@ -93,12 +99,74 @@ check_dependencies() {
     fi
 }
 
+# Função para instalação global do npm com fallback para ~/.local
+npm_global_install() {
+    local PREFIX
+    PREFIX="$(npm config get prefix 2>/dev/null || echo '')"
+    if [ -n "$PREFIX" ] && [ -w "$PREFIX" ]; then
+        npm install -g "$@"
+    else
+        if npm install -g "$@"; then :; else
+            log_warning "Sem permissão no prefix do npm. Usando ~/.local"
+            mkdir -p "$HOME/.local"
+            npm install -g --prefix "$HOME/.local" "$@"
+            # Adiciona ao PATH se não estiver presente
+            ensure_path_contains "$HOME/.local/bin"
+        fi
+    fi
+}
+
+# Adiciona um diretório ao PATH se não estiver presente
+ensure_path_contains() {
+    local dir="$1"
+    if [[ ":$PATH:" != *":$dir:"* ]]; then
+        export PATH="$dir:$PATH"
+        # Adiciona ao .bashrc e .zshrc se existirem
+        for rcfile in ~/.bashrc ~/.zshrc; do
+            if [ -f "$rcfile" ] && ! grep -q "export PATH=\"$dir:\$PATH\"" "$rcfile"; then
+                echo "export PATH=\"$dir:\$PATH\"" >> "$rcfile"
+                log_info "Adicionado $dir ao PATH em $rcfile"
+            fi
+        done
+    fi
+}
+
 # Instala rdcontext
 install_rdcontext() {
-    log_info "Instalando rdcontext..."
-    npm install -g git+https://github.com/resultadosdigitais/rdcontext.git
+    log_info "Verificando se rdcontext já está instalado..."
+    
+    # Verifica se rdcontext já está funcionando
     if command -v rdcontext &>/dev/null; then
-        log_success "rdcontext $(rdcontext --version) instalado com sucesso!"
+        log_success "rdcontext já está instalado e funcionando!"
+        if rdcontext --version &>/dev/null; then
+            log_success "Versão: $(rdcontext --version | tail -n1)"
+            return 0
+        else
+            log_warning "rdcontext encontrado mas não está funcionando. Reinstalando..."
+        fi
+    fi
+    
+    log_info "Instalando rdcontext..."
+    
+    # Remove instalação anterior se existir
+    if npm list -g rdcontext &>/dev/null; then
+        log_info "Removendo instalação anterior..."
+        npm uninstall -g rdcontext
+    fi
+    
+    # Verifica se estamos dentro do repositório rdcontext
+    if [ -f "./package.json" ] && grep -q "\"name\": \"rdcontext\"" "./package.json" 2>/dev/null; then
+        log_info "Instalando a partir do repositório local..."
+        npm install
+        npm run build
+        npm_global_install .
+    else
+        log_info "Instalando a partir do GitHub..."
+        npm_global_install git+https://github.com/resultadosdigitais/rdcontext.git
+    fi
+    
+    if command -v rdcontext &>/dev/null; then
+        log_success "rdcontext $(rdcontext --version | tail -n1) instalado com sucesso!"
     else
         log_error "❌ Falha na instalação do rdcontext"
         exit 1
@@ -117,7 +185,7 @@ configure_api_keys() {
 
     case $REPLY in
     1)
-        read -s -p "Digite sua Gemini API Key: " GEMINI_API_KEY
+        read -rs -p "Digite sua Gemini API Key: " GEMINI_API_KEY
         echo
         if [ -n "$GEMINI_API_KEY" ]; then
             CONFIG_STRING="
@@ -132,7 +200,7 @@ export GEMINI_EMBEDDING_MODEL=\"text-embedding-004\""
         fi
         ;;
     2)
-        read -s -p "Digite sua OpenAI API Key: " OPENAI_API_KEY
+        read -rs -p "Digite sua OpenAI API Key: " OPENAI_API_KEY
         echo
         if [ -n "$OPENAI_API_KEY" ]; then
             CONFIG_STRING="
@@ -156,7 +224,7 @@ configure_github_token() {
     read -p "Deseja configurar GitHub Token agora? (y/n): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        read -s -p "Digite seu GitHub Token: " GITHUB_TOKEN
+        read -rs -p "Digite seu GitHub Token: " GITHUB_TOKEN
         echo
         if [ -n "$GITHUB_TOKEN" ]; then
             CONFIG_STRING="
@@ -177,24 +245,28 @@ configure_cursor_mcp() {
     mkdir -p "$cursor_config_dir"
     cp "$mcp_config" "$mcp_config.backup.$(date +%Y%m%d_%H%M%S)" 2>/dev/null || true
 
-    cat >"$mcp_config" <<EOF
-{
-  "mcpServers": {
-    "rdcontext": {
-      "command": "rdcontext",
-      "args": ["start"],
-      "env": {
-        "GEMINI_API_KEY": "$GEMINI_API_KEY",
-        "OPENAI_API_KEY": "$OPENAI_API_KEY",
-        "GITHUB_TOKEN": "$GITHUB_TOKEN",
-        "AI_PROVIDER": "$AI_PROVIDER",
-        "GEMINI_EMBEDDING_MODEL": "text-embedding-004",
-        "OPENAI_EMBEDDING_MODEL": "text-embedding-3-large"
-      }
-    }
-  }
-}
-EOF
+    # Gera JSON de forma segura usando jq para evitar corrupção por caracteres especiais
+    jq -n \
+        --arg gemini_key "$GEMINI_API_KEY" \
+        --arg openai_key "$OPENAI_API_KEY" \
+        --arg github_token "$GITHUB_TOKEN" \
+        --arg ai_provider "$AI_PROVIDER" \
+        '{
+            "mcpServers": {
+                "rdcontext": {
+                    "command": "rdcontext",
+                    "args": ["start"],
+                    "env": {
+                        "GEMINI_API_KEY": $gemini_key,
+                        "OPENAI_API_KEY": $openai_key,
+                        "GITHUB_TOKEN": $github_token,
+                        "AI_PROVIDER": $ai_provider,
+                        "GEMINI_EMBEDDING_MODEL": "text-embedding-004",
+                        "OPENAI_EMBEDDING_MODEL": "text-embedding-3-large"
+                    }
+                }
+            }
+        }' > "$mcp_config"
     log_success "Configuração MCP criada em $mcp_config"
 }
 
