@@ -44,7 +44,9 @@ add_to_shell_config() {
 
     # Só adiciona se ainda não existir no arquivo (verifica declaração export real)
     if ! grep -qE "^[[:space:]]*export[[:space:]]+$var_name=" "$config_file" 2>/dev/null; then
-        echo "$config_string" >> "$config_file"
+        # Garante que não há caracteres especiais na string de configuração
+        CLEAN_CONFIG=$(echo "$config_string" | tr -d '\r')
+        echo "$CLEAN_CONFIG" >> "$config_file"
         log_success "Adicionado $var_name em $config_file"
     else
         log_info "$var_name já foi configurado em $config_file, pulando..."
@@ -227,12 +229,17 @@ configure_github_token() {
         read -rs -p "Digite seu GitHub Token: " GITHUB_TOKEN
         echo
         if [ -n "$GITHUB_TOKEN" ]; then
+            # Limpa o token de caracteres especiais
+            CLEAN_TOKEN=$(echo "$GITHUB_TOKEN" | tr -d '\r\n' | xargs)
             CONFIG_STRING="
 # rdcontext GitHub configuration
-export GITHUB_TOKEN=\"$GITHUB_TOKEN\""
+export GITHUB_TOKEN=\"$CLEAN_TOKEN\""
             add_to_shell_config ~/.bashrc GITHUB_TOKEN "$CONFIG_STRING"
             [ -f ~/.zshrc ] && add_to_shell_config ~/.zshrc GITHUB_TOKEN "$CONFIG_STRING"
-            export GITHUB_TOKEN="$GITHUB_TOKEN"
+            export GITHUB_TOKEN="$CLEAN_TOKEN"
+            log_success "✅ GitHub Token configurado e limpo!"
+        else
+            log_warning "⚠️  Token vazio, GitHub Token não configurado"
         fi
     fi
 }
@@ -310,6 +317,50 @@ configure_cursor_mcp() {
     fi
 }
 
+# Adiciona bibliotecas de exemplo
+add_example_libraries() {
+    echo
+    read -r -p "Deseja adicionar as bibliotecas da RD Station (Tangram e FrontHub)? (y/n): " add_examples
+    
+    if [[ $add_examples =~ ^[Yy]$ ]]; then
+        if [ -z "$GITHUB_TOKEN" ]; then
+            log_error "❌ GitHub Token necessário para adicionar bibliotecas da RD Station"
+            echo "Configure o token primeiro com: export GITHUB_TOKEN=\"seu_token\""
+            return
+        fi
+        
+        # Valida e limpa o token
+        CLEAN_TOKEN=$(echo "$GITHUB_TOKEN" | tr -d '\r\n' | xargs)
+        if [ -z "$CLEAN_TOKEN" ]; then
+            log_error "❌ GitHub Token está vazio após limpeza"
+            return
+        fi
+        
+        log_info "🔑 Token GitHub validado e limpo"
+        
+        # Verifica se tem API Key configurada
+        if [ -z "$GEMINI_API_KEY" ] && [ -z "$OPENAI_API_KEY" ]; then
+            log_error "❌ API Key necessária para processar documentação!"
+            echo "Configure uma API Key primeiro (Gemini ou OpenAI)"
+            return
+        fi
+        
+        log_info "Adicionando FrontHub..."
+        log_info "Comando: rdcontext add \"resultadosdigitais/front-hub\" --folders \"packages/front-hub-docs/docs\" --token [GITHUB_TOKEN]"
+        echo
+        # Limpa o token de caracteres especiais e espaços
+        CLEAN_TOKEN=$(echo "$GITHUB_TOKEN" | tr -d '\r\n' | xargs)
+        rdcontext add "resultadosdigitais/front-hub" --folders "packages/front-hub-docs/docs" --token "$CLEAN_TOKEN"
+        log_success "FrontHub adicionado com sucesso!"
+        
+        log_info "Adicionando Tangram Design System..."
+        log_info "Comando: rdcontext add \"resultadosdigitais/tangram\" --folders \"docs/examples/components\" \"docs/docs\" \"docs/code\" --token [GITHUB_TOKEN]"
+        echo
+        rdcontext add "resultadosdigitais/tangram" --folders "docs/examples/components" "docs/docs" "docs/code" --token "$CLEAN_TOKEN"
+        log_success "Tangram adicionado com sucesso!"
+    fi
+}
+
 # Testa a instalação
 test_installation() {
     if rdcontext --version &>/dev/null; then
@@ -321,6 +372,37 @@ test_installation() {
     rdcontext list
 }
 
+# Mostra próximos passos
+show_next_steps() {
+    echo
+    echo "🎉 Instalação concluída com sucesso!"
+    echo
+    echo "📋 Próximos passos:"
+    echo
+    echo "1. Reinicie o Cursor para aplicar as configurações MCP"
+    echo
+    echo "2. No Cursor, teste digitando:"
+    echo "   'Mostre exemplos de botões do Tangram'"
+    echo
+    echo "3. Para adicionar mais bibliotecas:"
+    echo "   rdcontext add \"owner/repo\" --folders \"pasta1\" \"pasta2\" --token SEU_GITHUB_TOKEN"
+    echo
+    echo "4. Comandos úteis:"
+    echo "   rdcontext list                    # Lista bibliotecas"
+    echo "   rdcontext get \"repo\" \"query\"     # Busca contexto"
+    echo
+    echo "5. Comandos específicos para RD Station:"
+    echo "   rdcontext add \"resultadosdigitais/front-hub\" --folders \"packages/front-hub-docs/docs\" --token SEU_GITHUB_TOKEN"
+    echo
+    echo "   rdcontext add \"resultadosdigitais/tangram\" --folders \"docs/examples/components\" \"docs/docs\" \"docs/code\" --token SEU_GITHUB_TOKEN"
+    echo
+    echo
+    echo "📚 Documentação completa:"
+    echo "   https://github.com/resultadosdigitais/rdcontext"
+    echo "   README.md - Guia completo de instalação e uso"
+    echo
+}
+
 main() {
     print_header
     check_dependencies
@@ -328,8 +410,9 @@ main() {
     configure_api_keys
     configure_github_token
     configure_cursor_mcp
+    add_example_libraries
     test_installation
-    echo "🎉 Instalação concluída. Reinicie o Cursor para aplicar."
+    show_next_steps
 }
 
 main "$@"
