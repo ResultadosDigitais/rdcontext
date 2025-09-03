@@ -270,11 +270,7 @@ configure_cursor_mcp() {
         env_obj=$(echo "$env_obj" | jq '. + {"OPENAI_EMBEDDING_MODEL": "text-embedding-3-large"}')
         
         jq --argjson env "$env_obj" \
-           '.mcpServers.rdcontext = {
-                "command": "rdcontext",
-                "args": ["start"],
-                "env": $env
-            }' \
+           '.mcpServers.rdcontext |= ((. // { "env": {} }) + { "command": "rdcontext", "args": ["start"] } | .env += $env)' \
             "$mcp_config" > "$mcp_config.tmp" && mv "$mcp_config.tmp" "$mcp_config"
         log_success "Configuração MCP atualizada em $mcp_config"
     else
