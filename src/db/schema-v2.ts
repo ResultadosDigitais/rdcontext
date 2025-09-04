@@ -59,7 +59,7 @@ export interface VectorRecord {
 // Embedding dimension constants
 export const EMBEDDING_DIMS = {
   OPENAI: 1536,
-  GEMINI: 3072,
+  GEMINI: 768, // text-embedding-004 returns 768 dimensions
   NORMALIZED: 3072, // Common dimension for cross-provider comparison
 } as const;
 

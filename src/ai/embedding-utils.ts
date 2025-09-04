@@ -15,12 +15,24 @@ export class EmbeddingNormalizer {
     }
   }
 
-  // Gemini embeddings are already 3072d - validate and return
+  // Normalize Gemini embeddings to 3072 dimensions
   private static normalizeGemini(embedding: number[]): number[] {
-    if (embedding.length !== 3072) {
-      throw new Error(`Invalid Gemini embedding dimensions: expected 3072, got ${embedding.length}`);
+    if (embedding.length === 3072) {
+      // Already 3072d - return as-is
+      return embedding;
     }
-    return embedding;
+    
+    if (embedding.length === 768) {
+      // Pad 768d embeddings to 3072d with zeros
+      // This is a simple approach - in production you might want more sophisticated normalization
+      const normalized = new Array(3072).fill(0);
+      for (let i = 0; i < 768; i++) {
+        normalized[i] = embedding[i];
+      }
+      return normalized;
+    }
+    
+    throw new Error(`Invalid Gemini embedding dimensions: expected 768 or 3072, got ${embedding.length}`);
   }
 
   // OpenAI embeddings: truncate from 1536d to 3072d (Matryoshka principle)
@@ -108,7 +120,7 @@ export class EmbeddingNormalizer {
   static validateEmbedding(embedding: number[], provider: EmbeddingProvider): boolean {
     switch (provider) {
       case 'gemini':
-        return embedding.length === 3072;
+        return [768, 3072].includes(embedding.length);
       case 'openai':
         return [3072, 1536, 3072].includes(embedding.length);
       default:
@@ -120,7 +132,7 @@ export class EmbeddingNormalizer {
   static getExpectedDimensions(provider: EmbeddingProvider): number[] {
     switch (provider) {
       case 'gemini':
-        return [3072];
+        return [768, 3072];
       case 'openai':
         return [3072, 1536, 3072];
       default:
