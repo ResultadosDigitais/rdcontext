@@ -106,9 +106,11 @@ check_dependencies() {
         if curl -fsSL https://bun.sh/install | bash; then
             # Recarrega o shell para disponibilizar o bun no PATH
             if [ -f ~/.bashrc ]; then
+                # shellcheck source=/dev/null
                 source ~/.bashrc 2>/dev/null || true
             fi
             if [ -f ~/.zshrc ]; then
+                # shellcheck source=/dev/null
                 source ~/.zshrc 2>/dev/null || true
             fi
             # Adiciona ~/.bun/bin ao PATH se necessário
