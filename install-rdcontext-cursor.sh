@@ -99,6 +99,24 @@ check_dependencies() {
     else
         log_success "jq encontrado"
     fi
+
+    # Verifica Bun
+    if ! command -v bun &>/dev/null; then
+        log_error "❌ Bun não encontrado!"
+        echo
+        echo "📦 O rdcontext requer o Bun para funcionar corretamente."
+        echo "   Scripts como 'npm run dev', 'npm run build' e 'npm run lint' dependem do Bun."
+        echo
+        echo "🔧 Para instalar o Bun:"
+        echo "   curl -fsSL https://bun.sh/install | bash"
+        echo
+        echo "   Ou visite: https://bun.sh/docs/installation"
+        echo
+        log_error "❌ Instale o Bun e execute este script novamente."
+        exit 1
+    else
+        log_success "Bun $(bun --version) encontrado"
+    fi
 }
 
 # Função para instalação global do npm com fallback para ~/.local
