@@ -99,6 +99,28 @@ check_dependencies() {
     else
         log_success "jq encontrado"
     fi
+
+    # Verifica Bun
+    if ! command -v bun &>/dev/null; then
+        log_warning "⚠️  Bun não encontrado. Instalando..."
+        if curl -fsSL https://bun.sh/install | bash; then
+            # Recarrega o shell para disponibilizar o bun no PATH
+            if [ -f ~/.bashrc ]; then
+                source ~/.bashrc 2>/dev/null || true
+            fi
+            if [ -f ~/.zshrc ]; then
+                source ~/.zshrc 2>/dev/null || true
+            fi
+            # Adiciona ~/.bun/bin ao PATH se necessário
+            ensure_path_contains "$HOME/.bun/bin"
+            log_success "Bun instalado com sucesso"
+        else
+            log_error "❌ Falha na instalação do Bun"
+            exit 1
+        fi
+    else
+        log_success "Bun $(bun --version) encontrado"
+    fi
 }
 
 # Função para instalação global do npm com fallback para ~/.local
