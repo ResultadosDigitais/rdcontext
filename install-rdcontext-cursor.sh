@@ -102,24 +102,18 @@ check_dependencies() {
 
     # Verifica Bun
     if ! command -v bun &>/dev/null; then
-        log_warning "⚠️  Bun não encontrado. Instalando..."
-        if curl -fsSL https://bun.sh/install | bash; then
-            # Recarrega o shell para disponibilizar o bun no PATH
-            if [ -f ~/.bashrc ]; then
-                # shellcheck source=/dev/null
-                source ~/.bashrc 2>/dev/null || true
-            fi
-            if [ -f ~/.zshrc ]; then
-                # shellcheck source=/dev/null
-                source ~/.zshrc 2>/dev/null || true
-            fi
-            # Adiciona ~/.bun/bin ao PATH se necessário
-            ensure_path_contains "$HOME/.bun/bin"
-            log_success "Bun instalado com sucesso"
-        else
-            log_error "❌ Falha na instalação do Bun"
-            exit 1
-        fi
+        log_error "❌ Bun não encontrado!"
+        echo
+        echo "📦 O rdcontext requer o Bun para funcionar corretamente."
+        echo "   Scripts como 'npm run dev', 'npm run build' e 'npm run lint' dependem do Bun."
+        echo
+        echo "🔧 Para instalar o Bun:"
+        echo "   curl -fsSL https://bun.sh/install | bash"
+        echo
+        echo "   Ou visite: https://bun.sh/docs/installation"
+        echo
+        log_error "❌ Instale o Bun e execute este script novamente."
+        exit 1
     else
         log_success "Bun $(bun --version) encontrado"
     fi
